@@ -8,6 +8,10 @@
       "StudyPhase":"String",
       "Conditions":[
         "String",
+        "String",
+        "String",
+        "String",
+        "String",
         "String"
       ],
       "Interventions":[
@@ -27,6 +31,21 @@
       "Masking":"String",
       "PrimaryPurpose":"String",
       "Investigators":[
+        {
+          "firstName":"String",
+          "lastName":"String",
+          "id":"0"
+        },
+        {
+          "firstName":"String",
+          "lastName":"String",
+          "id":"0"
+        },
+        {
+          "firstName":"String",
+          "lastName":"String",
+          "id":"0"
+        },
         {
           "firstName":"String",
           "lastName":"String",

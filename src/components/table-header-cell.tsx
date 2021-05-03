@@ -6,7 +6,7 @@ import {useContext, useState} from "react";
 import {FilterForm} from "./filter-form";
 import {FiltersContext} from "./multi-filter-mui-datagrid";
 
-export const TableHeaderCell = (params: GridColumnHeaderParams) => {
+export const TableHeaderCell = (params: GridColumnHeaderParams & {children: any}) => {
 
     const fc = useContext(FiltersContext);
 
@@ -32,7 +32,7 @@ export const TableHeaderCell = (params: GridColumnHeaderParams) => {
 
     return (
         <>
-            {params.field}
+            {params.children ? params.children : params.field}
             <IconButton onClick={handleClick}>
                 <FilterListIcon color={isFilterActive() ? 'primary' : 'inherit'}/>
             </IconButton>
