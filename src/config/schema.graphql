@@ -1,0 +1,49 @@
+scalar Date
+
+union NumOrDate = Date | Int
+
+type Location {
+    city: [String],
+    state: String,
+    country: String
+}
+
+type People {
+    firstName: String,
+    lastName: String,
+    id: String
+}
+
+type Sites {
+    siteName: String,
+    location: Location
+}
+
+type Record {
+    BriefTitle: String,
+    Status: String,
+    NCTID: String,
+    StudyPhase: String,
+    Conditions: [String],
+    Interventions: [String],
+    InterventionType: String,
+    Sponsor: String,
+    GenericName: String,
+    StartDate: NumOrDate,
+    EstimatedEndDate:  NumOrDate,
+    PrimaryCompletionDate:  NumOrDate,
+    StudyCompletionDate:  NumOrDate,
+    StudyType: String,
+    Allocation: String,
+    InterventionModel: String,
+    Masking: String,
+    PrimaryPurpose: String,
+    Investigators: [People],
+    TopInvestigators: [People],
+    Location: [Location],
+    Sites: [Sites],
+    FunderType: String,
+    LastUpdated: NumOrDate
+}
+
+
