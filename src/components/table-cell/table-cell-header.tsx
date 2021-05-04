@@ -3,10 +3,15 @@ import {GridColumnHeaderParams} from "@material-ui/data-grid";
 import {Fade, IconButton, Popper, Tooltip} from "@material-ui/core";
 import FilterListIcon from '@material-ui/icons/FilterList'
 import {useContext, useState} from "react";
-import {FilterForm} from "./filter-form";
-import {FiltersContext} from "./multi-filter-mui-datagrid";
+import {FilterForm} from "../filter-form";
+import {FiltersContext} from "../multi-filter-mui-datagrid";
 
-export const TableHeaderCell = (params: GridColumnHeaderParams & {children: any}) => {
+type TableCellHeaderProps = GridColumnHeaderParams & {
+    children?: any,
+    headerName?: string
+}
+
+export const TableCellHeader = (params: TableCellHeaderProps) => {
 
     const fc = useContext(FiltersContext);
 
@@ -32,7 +37,7 @@ export const TableHeaderCell = (params: GridColumnHeaderParams & {children: any}
 
     return (
         <>
-            {params.children ? params.children : params.field}
+            {params.children ? params.children : params.headerName}
             <IconButton onClick={handleClick}>
                 <FilterListIcon color={isFilterActive() ? 'primary' : 'inherit'}/>
             </IconButton>

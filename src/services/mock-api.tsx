@@ -16,7 +16,7 @@ export class MockApi {
         console.log('MOCK FILTERS:', filters);
         return fromFetch('/data.json').pipe(
             switchMap(response => response.json()),
-            map(value => ({...value,
+            /*map(value => ({...value,
               items: new Array(100).fill(value.items[0]).map((item,i) => ({...item,
                   BriefTitle: i + item.BriefTitle,
                   StartDate: item.StartDate - i*10000,
@@ -24,7 +24,7 @@ export class MockApi {
                   StudyPhase: columnsCfg.StudyPhase.filters.choices[getRandomInt(0,columnsCfg.StudyPhase.filters.choices.length-1)],
                   StudyType: columnsCfg.StudyPhase.filters.choices[getRandomInt(0,columnsCfg.StudyPhase.filters.choices.length-1)],
               }))
-            }))
+            }))*/
         );
     }
 

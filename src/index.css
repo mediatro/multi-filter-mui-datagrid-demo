@@ -11,3 +11,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.MuiDataGrid-row .MuiDataGrid-cell {
+  line-height: normal !important;
+  white-space: normal !important;
+  align-items: flex-start !important;
+  padding: 8px !important;
+}

@@ -16,13 +16,16 @@ import {useContext, useEffect, useState} from "react";
 import {FiltersContext} from "./multi-filter-mui-datagrid";
 import {InputProps as StandardInputProps} from "@material-ui/core/Input/Input";
 import {Filters, FiltersAware} from "../services/filters-state";
-import {ConfigKey, FiltersCfg, filterTypeDisplayNames} from "../config/columns-config";
+import {ConfigKey, FiltersCfg, filterTypeDisplayNameMap} from "../config/columns-config";
 import {
     MuiPickersUtilsProvider,
     KeyboardDatePicker,
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import {Autocomplete} from "@material-ui/lab";
+import {FilterFormGroupSearch} from "./filter-form/filter-form-group-search";
+import {FilterFormGroupDateRange} from "./filter-form/filter-form-group-date-range";
+import {FilterFormGroupChoice} from "./filter-form/filter-form-group-choice";
 
 
 type FilterFormProps = {
@@ -63,16 +66,29 @@ export const FilterForm = (props: FilterFormProps): JSX.Element => {
             ret = storeToVal();
             if(val){
                 if(!ret) {
-                    ret = new Array(2).fill(undefined);
+                    ret = {from: null, to: null};
                 }
-                ret[val[1]] = val[0];
+                ret[val[1]] = val[0].getTime();
             }
         }
+        //console.log(val, ret);
         setTempVal(ret);
     }
 
     const storeToVal = () => {
-        return tempVal;
+        let ret: any = tempVal;
+        if (getCurrentFilterCfg().type === 'date_range'){
+            if(!ret){
+                ret = {from: null, to: null};
+            }else{
+                ret = {
+                    from: ret.from ? new Date(ret.from) : null,
+                    to:  ret.to ? new Date(ret.to) : null,
+                }
+            }
+        }
+        //console.log(tempVal, ret);
+        return ret;
     }
 
     const handleInputChange = (event: any) => {
@@ -98,7 +114,7 @@ export const FilterForm = (props: FilterFormProps): JSX.Element => {
     }
 
     function getDisplayName(key: string) : string {
-        return filterTypeDisplayNames[key];
+        return filterTypeDisplayNameMap[key];
     }
 
     useEffect(() => {
@@ -117,71 +133,26 @@ export const FilterForm = (props: FilterFormProps): JSX.Element => {
 
     return (
         <Paper onClick={event => event.stopPropagation()}>
-            <Box p={1} width={400}>
+            <Box p={1} width={cfg.type === 'search' ? 300 : 400}>
                 <Typography variant={"h6"}>Filter by {getDisplayName(cfg.type)}</Typography>
 
                 {cfg.type === 'search' &&
-                    <TextField
-                        fullWidth={true}
-                        size={"small"}
-                        variant={"outlined"}
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <SearchIcon/>
-                                </InputAdornment>
-                            ),
-                        }}
-                        value={val}
-                        onChange={handleInputChange}
+                    <FilterFormGroupSearch value={(val as any)}
+                                           onChange={handleInputChange}
                     />
                 }
 
                 {cfg.type === 'date_range' &&
-                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <Grid container spacing={1}>
-                            <Grid item md>
-                                <KeyboardDatePicker
-                                    size={"small"}
-                                    inputVariant="outlined"
-                                    format="MM/dd/yyyy"
-                                    margin="normal"
-                                    value={val && val[0] ? val[0] : null}
-                                    emptyLabel={"Start Date"}
-                                    onChange={(e) => handleMultiInputChange(e,0)}
-                                />
-                            </Grid>
-                            <Grid item md>
-                                <KeyboardDatePicker
-                                    size={"small"}
-                                    inputVariant="outlined"
-                                    format="MM/dd/yyyy"
-                                    margin="normal"
-                                    value={val && val[1] ? val[1] : null}
-                                    emptyLabel={"End Date"}
-                                    onChange={(e) => handleMultiInputChange(e,1)}
-                                />
-                            </Grid>
-                        </Grid>
-                    </MuiPickersUtilsProvider>
+                    <FilterFormGroupDateRange value={(val as any)}
+                                              onChange={handleMultiInputChange}
+                    />
                 }
 
                 {cfg.type === 'choice' && cfg.choices &&
-                    <Autocomplete
-                        multiple
-                        id="tags-outlined"
-                        options={cfg.choices}
-                        defaultValue={Array.isArray(val) ? val : undefined}
-                        onChange={handleCheckboxChange}
-                        filterSelectedOptions
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="outlined"
-                                size={"small"}
-                                placeholder={`Select ${getCurrentField()}`}
-                            />
-                        )}
+                    <FilterFormGroupChoice options={cfg.choices}
+                                           value={(val as any)}
+                                           fieldName={getCurrentField()}
+                                           onChange={handleCheckboxChange}
                     />
                 }
 

@@ -16,7 +16,10 @@ export type FiltersAware = {
 export const defaultFilters: Filters = {
     filterModel: {
         items: []
-    }
+    },
+    pageChange: ({
+        pageSize: 25,
+    } as any)
 };
 
 export class FiltersState {

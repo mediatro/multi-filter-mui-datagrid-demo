@@ -1,11 +1,14 @@
-import {GridCellParams, GridColumnHeaderParams} from "@material-ui/data-grid";
+import {GridCellClassParams, GridCellParams, GridColumnHeaderParams} from "@material-ui/data-grid";
 import InfoIcon from '@material-ui/icons/Info';
 import {Grid, Link, Tooltip} from "@material-ui/core";
 import * as apiSchema from "./api-schema";
-import {CustomChoiceLabel} from "../components/custom-choice-label";
-import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import {TableHeaderCell} from "../components/table-header-cell";
+import {TableCellCustomOptionLabel} from "../components/table-cell/table-cell-custom-option-label";
+import {TableCellHeader} from "../components/table-cell/table-cell-header";
+import {TableCellTitle} from "../components/table-cell/table-cell-title";
+import {TableCellDate} from "../components/table-cell/table-cell-date";
+import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import {TableCellArray} from "../components/table-cell/table-cell-array";
 
 export type ConfigKey = keyof apiSchema.Record | string;
 
@@ -16,10 +19,15 @@ export type FilterConfig = {
 
 export type FiltersCfg = { [key: string]: FilterConfig };
 
-export const filterTypeDisplayNames: {[key: string]: string} = {
+export const filterTypeDisplayNameMap: {[key: string]: string} = {
     'search': 'keyword',
     'choice': 'options',
     'date_range': 'date range'
+}
+
+export const componentMap: {[key: string]: any} = {
+    'LocalHospitalIcon': <LocalHospitalIcon/>,
+    'VisibilityIcon': <VisibilityIcon/>,
 }
 
 export const customChoiceLabels: {[key: string]: string[]} = {
@@ -44,19 +52,21 @@ export const customChoiceLabels: {[key: string]: string[]} = {
     'Observational': ['','','VisibilityIcon'],
 }
 
+const valueFormatters = {
+    people: (value: apiSchema.People) => `${value.firstName} ${value.lastName}`,
+    location: (value: apiSchema.Location) => `${value.country}/${value.state}/${value.city}`,
+}
+
 export const columnsCfg: {[key in ConfigKey] : any} = {
     BriefTitle: {
-        renderCell: (params: GridCellParams) => (
-            <Tooltip title="View details page">
-                <Link href={"#"}>{params.formattedValue}</Link>
-            </Tooltip>
-        ),
+        label: 'Brief Title',
+        renderCell: (params: GridCellParams) => <TableCellTitle {...params} />, // wrap with anon function like this if you need to use hooks inside a component
         filters: {
             type: 'search'
         }
     },
     Status: {
-        renderCell: CustomChoiceLabel,
+        renderCell: TableCellCustomOptionLabel,
         filters: {
             type: 'choice',
             choices: [
@@ -79,7 +89,8 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     StudyPhase: {
-        renderCell: CustomChoiceLabel,
+        label: 'Study Phase',
+        renderCell: TableCellCustomOptionLabel,
         filters: {
             type: 'choice',
             choices: [
@@ -93,6 +104,7 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     Conditions: {
+        renderCell: (params: GridCellParams) => <TableCellArray {...params} limit={4}/>,
         filters: {
             type: 'search'
         }
@@ -103,6 +115,7 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     InterventionType: {
+        label: 'Intervention Type',
         filters: {
             type: 'choice',
             choices: [
@@ -126,31 +139,42 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     GenericName: {
+        label: 'Generic Name',
         filters: {
             type: 'search'
         }
     },
     StartDate: {
+        label: 'Start Date',
+        renderCell: TableCellDate,
         filters: {
             type: 'date_range'
         }
     },
     EstimatedEndDate: {
+        label: 'Estimated End Date',
+        renderCell: TableCellDate,
         filters: {
             type: 'date_range'
         }
     },
     PrimaryCompletionDate: {
+        label: 'Primary Completion Date',
+        renderCell: TableCellDate,
         filters: {
             type: 'date_range'
         }
     },
     StudyCompletionDate: {
+        label: 'Study Completion Date',
+        renderCell: TableCellDate,
         filters: {
             type: 'date_range'
         }
     },
     StudyType: {
+        label: 'Study Type',
+        renderCell: TableCellCustomOptionLabel,
         filters: {
             type: 'choice',
             choices: [
@@ -165,6 +189,7 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     InterventionModel: {
+        label: 'Intervention Model',
         filters: {
             type: 'search'
         }
@@ -175,13 +200,14 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     PrimaryPurpose: {
+        label: 'Primary Purpose',
         filters: {
             type: 'search'
         }
     },
     Investigators: {
         renderHeader: (params: GridColumnHeaderParams) => (
-            <TableHeaderCell {...params}>
+            <TableCellHeader {...params}>
                 <Grid container spacing={1}>
                     <Grid item>
                         {'Investigators'}
@@ -192,18 +218,21 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
                         </Tooltip>
                     </Grid>
                 </Grid>
-            </TableHeaderCell>
+            </TableCellHeader>
         ),
+        renderCell: (params: GridCellParams) => <TableCellArray {...params} valueFormatter={valueFormatters.people}/>,
         filters: {
             type: 'search'
         }
     },
     TopInvestigators: {
+        label: 'Top Investigators',
         filters: {
             type: 'search'
         }
     },
     Location: {
+        renderCell: (params: GridCellParams) => <TableCellArray {...params} valueFormatter={valueFormatters.location}/>,
         filters: {
             type: 'search'
         }
@@ -214,6 +243,7 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     FunderType: {
+        label: 'Funder Type',
         filters: {
             type: 'choice',
             choices: [
@@ -225,6 +255,8 @@ export const columnsCfg: {[key in ConfigKey] : any} = {
         }
     },
     LastUpdated: {
+        label: 'Last Updated',
+        renderCell: TableCellDate,
         filters: {
             type: 'date_range'
         }
