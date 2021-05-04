@@ -12,13 +12,14 @@ import {
 import {Box, createStyles, Link, makeStyles, Paper, Theme, Tooltip} from "@material-ui/core";
 import {MockApi} from "../services/mock-api";
 import {FilterChipPanel, FilterChipPanelProps} from "./filter-chip-panel";
-import {FiltersAware, FiltersState} from "../services/filters-state";
+import {Filters, FiltersAware, FiltersState} from "../services/filters-state";
 import {TableCellHeader} from "./table-cell/table-cell-header";
 import {columnsCfg, componentMap, ConfigKey, customChoiceLabels} from "../config/columns-config";
 import {mergeMap} from "rxjs/operators";
 import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import moment from "moment/moment";
+import {useCustomData} from "../hooks/use-custom-data";
 
 
 type FiltersContextType = {
@@ -93,6 +94,8 @@ export const MultiFilterMuiDatagrid = (props: MuiTableProps): JSX.Element => {
     const [tableData, setTableData] = useState<TableData | null>(null);
     const [loading, setLoading] = useState(false);
 
+    useCustomData(filters => console.log('THIS IS HOOK', filters));
+
     function getColumnsCfg(): {[key in ConfigKey] : any}{
         return columnsCfg;
     }
@@ -147,9 +150,28 @@ export const MultiFilterMuiDatagrid = (props: MuiTableProps): JSX.Element => {
         fc.state.clearFilters();
     }
 
+
+    const saveStateKey = 'filters_state'
+
+    const saveState = (value: Filters) => {
+        localStorage.setItem(saveStateKey, JSON.stringify(value));
+    }
+
+    const loadState = () => {
+        let savedState = localStorage.getItem(saveStateKey);
+        if (savedState){
+            fc.state.setFilters(JSON.parse(savedState));
+        }
+    }
+
     useEffect(() => {
+        loadState();
         fc.state.filtersChange$.pipe(
-            mergeMap(value => props.api.getData$(value))
+            mergeMap(value => {
+                setLoading(true);
+                saveState(value);
+                return props.api.getData$(value);
+            })
         ).subscribe(value => {
             setTableData(transformData(value));
             setLoading(false);
