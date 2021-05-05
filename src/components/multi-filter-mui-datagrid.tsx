@@ -9,7 +9,7 @@ import {
     GridRowData,
     GridSortModelParams
 } from '@material-ui/data-grid';
-import {Box, createStyles, Link, makeStyles, Paper, Theme, Tooltip} from "@material-ui/core";
+import {Box, createStyles, Grid, Link, makeStyles, Paper, Theme, Tooltip} from "@material-ui/core";
 import {MockApi} from "../services/mock-api";
 import {FilterChipPanel, FilterChipPanelProps} from "./filter-chip-panel";
 import {Filters, FiltersAware, FiltersState} from "../services/filters-state";
@@ -20,6 +20,8 @@ import LocalHospitalIcon from '@material-ui/icons/LocalHospital';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import moment from "moment/moment";
 import {useCustomData} from "../hooks/use-custom-data";
+import ReactDOM from "react-dom";
+import {Subject} from "rxjs";
 
 
 type FiltersContextType = {
@@ -165,6 +167,7 @@ export const MultiFilterMuiDatagrid = (props: MuiTableProps): JSX.Element => {
     }
 
     useEffect(() => {
+
         loadState();
         fc.state.filtersChange$.pipe(
             mergeMap(value => {
@@ -189,37 +192,109 @@ export const MultiFilterMuiDatagrid = (props: MuiTableProps): JSX.Element => {
         onClear: onClear
     }
 
+    const container = React.useRef(null);
+    const container2 = React.useRef(null);
+    const table = React.useRef(null);
+    const click$ = new Subject();
+
+    if(table.current){
+        let zones = (table as any).current.getElementsByClassName('MuiDataGrid-renderingZone');
+        if(zones.length>0){
+            let target = zones[0];
+            const config = {attributes: true,};
+
+            const callback = () => (container2 as any).current.style.transform = target.style.transform.replace(/(.+,)(.+)(,.+)/, 'translate3d(0px,$2,0px)');
+            const observer = new MutationObserver(callback);
+            observer.observe(target, config);
+        }
+    }
+
+
     return (
         <FiltersContext.Provider value={fc}>
         <CustomColumnsContext.Provider value={ccc}>
-        <FormatterContext.Provider value={defaultFormatterContext}>
+        <FormatterContext.Provider value={({...defaultFormatterContext, ref: container, ref2: container2, click$: click$} as any)}>
             <Box p={2}>
-                <FilterChipPanel {...filterChipProps}/>
-                <Paper>
-                    <Box height={400}>
-                        {tableData && <DataGrid columns={tableData.cols}
-                                                rows={tableData.rows}
-                                                pageSize={25}
-                                                disableSelectionOnClick={true}
-                                                columnBuffer={2}
-                                                columnTypes={{}}
-                                                density={"standard"}
-                                                headerHeight={56}
-                                                localeText={{}}
-                                                rowHeight={100}
-                                                sortingOrder={['asc', 'desc', null]}
-                                                filterMode="server"
-                                                onFilterModelChange={handleFilterModelChange}
-                                                sortingMode="server"
-                                                onSortModelChange={handleSortModelChange}
-                                                paginationMode="server"
-                                                onPageChange={handlePageChange}
-                                                onPageSizeChange={handlePageChange}
-                                                loading={loading}
-                                                disableColumnMenu={true}
-                        />}
-                    </Box>
-                </Paper>
+                <Grid container direction={"column"}>
+                    <Grid item>
+                        <FilterChipPanel {...filterChipProps}/>
+                    </Grid>
+
+                    <Grid container item>
+
+                        <Grid item md={3}>
+                            <Paper className={'MuiDataGrid-root'}>
+
+                                <div className="MuiDataGrid-columnsContainer"
+                                     style={{minHeight: '56px', maxHeight: '56px', lineHeight: '56px', position: "static"}}>
+                                    <div className="MuiDataGrid-colCellWrapper scroll" role="row">
+
+                                        <div className="MuiDataGrid-colCell MuiDataGrid-colCellSortable"
+                                             style={{width: '250px', minWidth: '250px', maxWidth: '250px'}} role="columnheader">
+                                            <div className="MuiDataGrid-colCell-draggable" draggable="false">
+                                                <div className="MuiDataGrid-colCellTitleContainer" ref={container} onClick={event => click$.next(event)}>
+
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div style={{overflow: 'visible', height: '0px', width: '0px'}}>
+                                <div className="MuiDataGrid-windowContainer">
+                                    <div className="MuiDataGrid-window" style={{top: '56px', overflowY: 'hidden'}}>
+                                        <div className="MuiDataGrid-dataContainer data-container"
+                                             style={{minHeight: '1770px'}}>
+                                            <div className="MuiDataGrid-viewport" style={{maxHeight: '273px'}}>
+                                                <div className="MuiDataGrid-renderingZone" ref={container2}>
+
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+
+                            </Paper>
+                        </Grid>
+
+                        <Grid item md>
+                            <Paper ref={table}>
+                                <Box height={400}>
+                                    {tableData && <DataGrid columns={tableData.cols}
+                                                            rows={tableData.rows}
+                                                            pageSize={25}
+                                                            disableSelectionOnClick={true}
+                                                            columnBuffer={55}
+                                                            columnTypes={{}}
+                                                            density={"standard"}
+                                                            headerHeight={56}
+                                                            localeText={{}}
+                                                            rowHeight={100}
+                                                            sortingOrder={['asc', 'desc', null]}
+                                                            filterMode="server"
+                                                            onFilterModelChange={handleFilterModelChange}
+                                                            sortingMode="server"
+                                                            onSortModelChange={handleSortModelChange}
+                                                            paginationMode="server"
+                                                            onPageChange={handlePageChange}
+                                                            onPageSizeChange={handlePageChange}
+                                                            loading={loading}
+                                                            disableColumnMenu={true}
+                                                            onResize={param => console.log(param)}
+                                    />}
+                                </Box>
+                            </Paper>
+                        </Grid>
+
+                    </Grid>
+
+                </Grid>
             </Box>
 
         </FormatterContext.Provider>

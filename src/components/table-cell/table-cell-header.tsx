@@ -6,7 +6,7 @@ import {useContext, useState} from "react";
 import {FilterForm} from "../filter-form";
 import {FiltersContext} from "../multi-filter-mui-datagrid";
 
-type TableCellHeaderProps = GridColumnHeaderParams & {
+export type TableCellHeaderProps = GridColumnHeaderParams & {
     children?: any,
     headerName?: string
 }

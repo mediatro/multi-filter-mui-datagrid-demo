@@ -9,6 +9,7 @@ import {TableCellDate} from "../components/table-cell/table-cell-date";
 import LocalHospitalIcon from "@material-ui/icons/LocalHospital";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import {TableCellArray} from "../components/table-cell/table-cell-array";
+import {TableCellHeaderTitle} from "../components/table-cell/table-cell-header-title";
 
 export type ConfigKey = keyof apiSchema.Record | string;
 
@@ -60,6 +61,8 @@ const valueFormatters = {
 export const columnsCfg: {[key in ConfigKey] : any} = {
     BriefTitle: {
         label: 'Brief Title',
+        width: 0,
+        renderHeader: (params: GridColumnHeaderParams) => <TableCellHeaderTitle {...params} />,
         renderCell: (params: GridCellParams) => <TableCellTitle {...params} />, // wrap with anon function like this if you need to use hooks inside a component
         filters: {
             type: 'search'
